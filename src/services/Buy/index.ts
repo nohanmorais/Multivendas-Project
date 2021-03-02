@@ -3,15 +3,15 @@ import { apikey } from "../../shared/utils/endpoints";
 import api from "../api";
 
 
-async function Buy (id_product: string): Promise<any> {
+async function Buy (id_product: string): Promise<number> {
 
     const response = await api.get<ordertobuy>(
         `pedidoscompra/json/?apikey=${apikey}&filters=situacao[1]`);
 
     // retornando os codigos dos produtos
-     const buy = response.data.retorno.pedidoscompra;
-    console.log(buy);
-    const found1 = buy.map(g => {
+    const buy = await response.data.retorno.pedidoscompra;
+    
+    const found1 = await buy.map(g => {
         const found2 = g.map(h => {
             const product = h.pedidocompra.itens.map(i => {
                 const findId = i.item.codigo;
@@ -28,7 +28,7 @@ async function Buy (id_product: string): Promise<any> {
         return found2;
     })
 
-    const value = found1[0];
+    const value = await found1[0];
 
     // retornando soma total dos produtos
     const totalArray = await value.map(e => 
@@ -41,7 +41,7 @@ async function Buy (id_product: string): Promise<any> {
     })
 
     // retornando a quantidade de itens comprados
-    const howMany = buy.map(g => {
+    const howMany = await buy.map(g => {
         const found2 = g.map(h => {
             const product = h.pedidocompra.itens.map(i => {
                 const findId = i.item.codigo;
@@ -57,7 +57,7 @@ async function Buy (id_product: string): Promise<any> {
         return found2;
     })
 
-    const values = howMany[0];
+    const values = await howMany[0];
 
 
     //retornando a quantidade total de itens comprados
@@ -72,9 +72,9 @@ async function Buy (id_product: string): Promise<any> {
     })
 
     //media
-    const media = totalValue/totalValueQtde;
+    const media =  totalValue/totalValueQtde;
 
-    return totalValue;
+    return media;
 }
 
 

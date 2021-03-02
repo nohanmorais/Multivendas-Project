@@ -5,8 +5,8 @@ import api from '../../services/api';
 import { apikey } from '../../shared/utils/endpoints';
 import { itens, order, SalesOrder } from '../../models/sales';
 import { getTaxes, getValueWithoutTaxes } from '../../services/taxes/index';
-import Buy from '../../services/Buy';
-import { Inventory } from '../../services/Products';
+import { ordertobuy } from '../../models/buy';
+
 
 const Sales: React.FC = () => {
     
@@ -23,8 +23,13 @@ const Sales: React.FC = () => {
         `pedidos/json/?apikey=${apikey}&filters=dataEmissao[${newDate1}TO${newDate2}]`);
     
     const sale = response.data;
+
+    const responses = await api.get<ordertobuy>(
+        `pedidoscompra/json/?apikey=${apikey}&filters=situacao[1]`);
+
+    const buy = responses.data;
     
-    const updateLiquid = response.data.retorno.pedidos.map((p: SalesOrder) => {
+    sale.retorno.pedidos.map((p: SalesOrder) => {
         
         const value = p.pedido.parcelas.map(e => {
             const total = e.parcela.valor;
@@ -40,24 +45,69 @@ const Sales: React.FC = () => {
         }).toFixed(2)
 
         return p.pedido.totalliquido = sum;
-    }
+    });
 
 
-    
-
-
+    sale.retorno.pedidos.map(f => {
         
-    );
+        const cod = f.pedido.itens.map(e => {
 
-    const updateCoust = response.data.retorno.pedidos.map((p: SalesOrder) => {
-        
-        const product = p.pedido.itens.map(q => {
-            const cod = q.item.codigo;
-            return cod;
+            const cod1 = e.item.codigo;
+            return cod1;
         })
 
-        return product;
-    })
+        console.log(String(cod));
+
+            const buycod = buy.retorno.pedidoscompra.map(g => {
+              
+            
+            const buy1 = g.map(h => {
+
+                const buy2 = h.pedidocompra.itens.map(i =>{
+                    console.log(i.item.codigo);
+                    console.log(cod);
+                    if(i.item.codigo === String(cod)) {
+                        const qtd = i.item.qtde;
+                        const value = i.item.valor; 
+                        return Number(value)*qtd;
+                    }
+                        return 0;
+                    })                
+                    const totalArray = buy2.reduce((acc, curr) => {return acc + curr});
+                    return totalArray;                  
+                })
+
+                // Soma total de compra
+                const totalValue = buy1.reduce((acc, curr) => {return acc + curr});
+
+            const qtd1 = g.map(h => {
+                
+                const qtd2 = h.pedidocompra.itens.map(i => {
+                    const codItem = i.item.codigo;
+                    const qtd3 = i.item.qtde;
+                    if(codItem === String(cod)) {
+                        return qtd3;
+                    }
+                        return 0;
+                })
+
+                const totalArray = qtd2.reduce((acc, curr) => {return acc + curr});
+                return totalArray;
+            })
+                
+                const totalQtd = qtd1.reduce((acc, curr) => {return Number(acc) + Number(curr)});
+
+                const media = totalValue / totalQtd;
+                
+                return media;
+            })
+            console.log(buycod);
+            return f.pedido.totalcusto = String(buycod);
+        })
+
+
+        // Quando tem mais de um produto ele nao calcula! Verificar!
+
 
     // const updatecoust = response.data.retorno.pedidos.map((p: SalesOrder) => {
         
@@ -84,6 +134,7 @@ const Sales: React.FC = () => {
 
     }
 
+   
 
 
 
@@ -137,8 +188,8 @@ const Sales: React.FC = () => {
                 " "+Number(s.item.quantidade)+" "+s.item.descricao) }
                 </div>
                 <div>R$ {e.pedido.totalliquido}</div>
-                <div>R$ </div>
-                <div>R$ {(Number(e.pedido.totalliquido) - 200).toFixed(2)}</div>
+                <div>R$ {(Number(e.pedido.totalcusto)*(Number(e.pedido.itens.map(f => f.item.quantidade)))).toFixed(2)}</div>
+                <div>R$ {((Number(e.pedido.totalliquido))-(Number(e.pedido.totalcusto)*(Number(e.pedido.itens.map(f => f.item.quantidade))))).toFixed(2)}</div>
                 <div>R$ {e.pedido.valorfrete}</div>
                 </>
                     
