@@ -1,84 +1,45 @@
-import { ordertobuy } from "../../models/buy";
-import { apikey } from "../../shared/utils/endpoints";
-import api from "../api";
+import { itens } from "../../models/buy";
 
 
-async function Buy (id_product: string): Promise<number> {
+export function filterCod(itens: itens[], id: string) {
 
-    const response = await api.get<ordertobuy>(
-        `pedidoscompra/json/?apikey=${apikey}&filters=situacao[1]`);
+    const get = itens.filter(itens => {
+        return itens.item.codigo === id
+    })
 
-    // retornando os codigos dos produtos
-    const buy = await response.data.retorno.pedidoscompra;
+    if(get.length === 0) {
+        return 0;
+    }
+
+    return get;
+}
+
+export function getValueofABuy(itens: itens[]) {
     
-    const found1 = await buy.map(g => {
-        const found2 = g.map(h => {
-            const product = h.pedidocompra.itens.map(i => {
-                const findId = i.item.codigo;
-                const findQtd = i.item.qtde;
-                const findValue = Number(i.item.valor)*findQtd;
-                if (id_product === findId) {
-                    return findValue
-                } else {
-                    return 0;
-                }
-            })
-            return product;
-        })
-        return found2;
+    const itensValue = itens.map(values => {
+
+        const value = Number(values.item.valor)*(values.item.qtde);
+        return value;
     })
 
-    const value = await found1[0];
+    const sum = itensValue.reduce((acc, curr) => {return acc + curr});
+    return sum;
+}
 
-    // retornando soma total dos produtos
-    const totalArray = await value.map(e => 
-        e.reduce((acc, curr) => {
-            return acc + curr;
-        }))
+export function getQtdesofABuy(itens: itens[]) {
+    
+    const itensValue = itens.map(values => {
 
-    const totalValue = await totalArray.reduce((acc, curr) => {
-        return acc + curr;
+        const value = values.item.qtde;
+        return value;
     })
 
-    // retornando a quantidade de itens comprados
-    const howMany = await buy.map(g => {
-        const found2 = g.map(h => {
-            const product = h.pedidocompra.itens.map(i => {
-                const findId = i.item.codigo;
-                const findValue = i.item.qtde;
-                if (id_product === findId) {
-                    return findValue
-                } else {
-                    return 0;
-                }
-            })
-            return product;
-        })
-        return found2;
-    })
-
-    const values = await howMany[0];
-
-
-    //retornando a quantidade total de itens comprados
-
-    const totalQtde = await values.map(e => 
-        e.reduce((acc, curr) => {
-            return acc + curr;
-        }))
-
-    const totalValueQtde = await totalQtde.reduce((acc, curr) => {
-        return acc + curr;
-    })
-
-    //media
-    const media =  totalValue/totalValueQtde;
-
-    return media;
+    const sum = itensValue.reduce((acc, curr) => {return acc + curr});
+    return sum;
 }
 
 
+export function getSumOfArrayNumber(number: number[]) {
 
-
-export default Buy;
-
+    return number.reduce((acc, curr) => {return acc + curr});
+}

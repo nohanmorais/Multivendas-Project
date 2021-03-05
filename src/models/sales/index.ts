@@ -7,8 +7,9 @@ export interface SalesOrder {
         vendedor: string;
         valorfrete: string;
         totalprodutos: string;
-        totalliquido: string;
-        totalcusto: string;
+        totalliquido: number;
+        totalcustocomprado: number;
+        totalqtdecomprada: string;
         situacao: string;
         itens: itens[];
         parcelas: Payment[];

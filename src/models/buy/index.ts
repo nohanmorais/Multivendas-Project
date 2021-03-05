@@ -26,6 +26,7 @@ export interface itens {
     descricao: string;
     qtde: number;
     valor: string;
+    customedio: string;
     }
 }
 
