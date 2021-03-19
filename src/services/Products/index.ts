@@ -15,7 +15,5 @@ export async function Inventory (id_product: string): Promise<any> {
         return e.produto.estoqueAtual;
     })
 
-    console.log(atual);
-
     return atual;
 }
